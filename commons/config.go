@@ -12,6 +12,7 @@ import (
 
 const (
 	ConfigFilePathDefault     string = "/etc/s3_data_watcher/config.yml"
+	JobFilePathDefault        string = "/etc/s3_data_watcher/jobs.yml"
 	NatsUrlDefault            string = "nats://nats:4222"
 	NatsSubjectDefault        string = ""
 	NatsMaxReconnectsDefault  int    = -1
@@ -49,6 +50,8 @@ type Config struct {
 	// S3 FS Event Publish
 	NatsConfig NatsConfig `yaml:"nats_config,omitempty"`
 
+	JobFilePath string `yaml:"job_file_path,omitempty"`
+
 	// for Logging
 	LogPath string `yaml:"log_path,omitempty"`
 
@@ -61,6 +64,7 @@ type Config struct {
 func NewDefaultConfig() *Config {
 	return &Config{
 		DataRootPath: GetDefaultDataRootDirPath(),
+		JobFilePath:  JobFilePathDefault,
 
 		NatsConfig: NatsConfig{
 			URL:            NatsUrlDefault,
@@ -158,6 +162,10 @@ func (config *Config) makeDir(path string) error {
 func (config *Config) Validate() error {
 	if len(config.DataRootPath) == 0 {
 		return xerrors.Errorf("data root dir must be given")
+	}
+
+	if len(config.JobFilePath) == 0 {
+		return xerrors.Errorf("job file path must be given")
 	}
 
 	if len(config.NatsConfig.URL) == 0 {
