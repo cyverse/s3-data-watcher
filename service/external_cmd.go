@@ -1,9 +1,20 @@
 package service
 
 import (
+	"encoding/json"
+
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/cyverse/s3-data-watcher/commons"
 	log "github.com/sirupsen/logrus"
+	"golang.org/x/xerrors"
 )
+
+// MinIOS3Event which wrap an array of S3EventRecord
+type MinIOS3Event struct {
+	EventName string                 `json:"EventName"`
+	Key       string                 `json:"Key"`
+	Records   []events.S3EventRecord `json:"Records"`
+}
 
 type ExternalCmdService struct {
 	service *S3DataWatcherService
@@ -37,5 +48,36 @@ func (externalCmdService *ExternalCmdService) S3EventHandler(msg []byte) {
 
 	defer commons.StackTraceFromPanic(logger)
 
-	logger.Info(string(msg))
+	logger.Debug(string(msg))
+
+	s3Event, err := externalCmdService.convToS3Event(msg)
+	if err != nil {
+		err := xerrors.Errorf("failed to convert message to S3Event")
+		logger.Error(err)
+		return
+	}
+
+	for _, record := range s3Event.Records {
+		logger.Infof("eventName: %s, bucket: %s, object: %s", record.EventName, record.S3.Bucket.Name, record.S3.Object.Key)
+	}
+}
+
+func (externalCmdService *ExternalCmdService) convToS3Event(msg []byte) (*events.S3Event, error) {
+	var minioS3Event MinIOS3Event
+	err := json.Unmarshal(msg, &minioS3Event)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(minioS3Event.EventName) == 0 {
+		return nil, xerrors.Errorf("empty event name")
+	}
+
+	if len(minioS3Event.Key) == 0 {
+		return nil, xerrors.Errorf("empty key")
+	}
+
+	return &events.S3Event{
+		Records: minioS3Event.Records,
+	}, nil
 }
