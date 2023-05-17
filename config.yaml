@@ -3,4 +3,5 @@ nats_config:
   subject: minio.events
 
 data_root_path: /tmp/s3_data_watcher_data
+job_file_path: ./jobs.yaml
 debug: true
