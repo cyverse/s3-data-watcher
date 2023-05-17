@@ -1,4 +1,5 @@
 jobs:
   - command: test.py
     filter:
-      EventName: "*"
+      events:
+        - "*"

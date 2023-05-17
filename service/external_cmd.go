@@ -229,6 +229,8 @@ func (externalCmdService *ExternalCmdService) runJob(job *Job, record events.S3E
 
 	defer commons.StackTraceFromPanic(logger)
 
+	logger.Infof("running a job - %s", job.Command)
+
 	cmd := exec.Command(job.Command)
 
 	childStdin, err := cmd.StdinPipe()
