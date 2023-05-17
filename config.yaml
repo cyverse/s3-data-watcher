@@ -1,0 +1,6 @@
+nats_config:
+  url: nats://192.168.0.130:4222
+  subject: minio.events
+
+data_root_path: /tmp/s3_data_watcher_data
+debug: true
