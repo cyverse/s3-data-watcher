@@ -1,5 +1,5 @@
 jobs:
-  - command: test.py
+  - command: ./test_exec/test.py
     filter:
       events:
         - "*"
